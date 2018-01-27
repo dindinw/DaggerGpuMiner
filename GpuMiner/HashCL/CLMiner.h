@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Core\Worker.h"
-#include "Core\Miner.h"
+#include "Core/Worker.h"
+#include "Core/Miner.h"
 //#include <libhwmon/wrapnvml.h>
 //#include <libhwmon/wrapadl.h>
 #if defined(__linux)

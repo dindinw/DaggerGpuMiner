@@ -5,6 +5,15 @@
 #include <Windows.h>
 #include <WinSock2.h>
 #else
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <poll.h>
+#include <unistd.h>
+#include <fcntl.h>
 #define SOCKET int
 #endif
 

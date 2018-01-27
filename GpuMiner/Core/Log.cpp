@@ -26,7 +26,7 @@ std::mutex x_logOverride;
 /// Map of Log Channel types to bool, false forces the channel to be disabled, true forces it to be enabled.
 /// If a channel has no entry, then it will output as long as its verbosity (LogChannel::verbosity) is less than
 /// or equal to the currently output verbosity (g_logVerbosity).
-static std::map<type_info const*, bool> s_logOverride;
+static std::map<std::type_info const*, bool> s_logOverride;
 
 #ifdef _WIN32
 const char* LogChannel::name() { return EthGray "..."; }

@@ -1,8 +1,9 @@
-#include <conio.h>
+//#include <conio.h>
+#include <curses.h>
 #include <thread>
 #include <fstream>
 #include <iostream>
-#include "Core\MinerManager.h"
+#include "Core/MinerManager.h"
 
 using namespace XDag;
 

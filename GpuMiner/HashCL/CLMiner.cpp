@@ -4,10 +4,11 @@
 /// @copyright GNU General Public License
 
 #include "CLMiner.h"
-#include "Utils\PathUtils.h"
+//#include "Utils\PathUtils.h"
 #include <fstream>
-#include "Hash\sha256_mod.h"
+#include "Hash/sha256_mod.h"
 #include <boost/algorithm/string.hpp>
+#include "CLMiner_kernel.h"
 
 using namespace XDag;
 
@@ -311,11 +312,14 @@ bool CLMiner::Init()
     // get all platforms
     try
     {
+		/*
         if(!LoadKernel())
         {
             XCL_LOG("Cannot load OpenCL kernel file");
             return false;
         }
+		*/
+		std::string _kernelCode = std::string(CLMiner_kernel_stable, CLMiner_kernel_stable + sizeof(CLMiner_kernel_stable));
 
         std::vector<cl::Platform> platforms = GetPlatforms();
         if(platforms.empty())
@@ -639,6 +643,7 @@ HwMonitor CLMiner::Hwmon()
 }
 
 /* loads the kernel file into a string */
+/*
 bool CLMiner::LoadKernel()
 {
     std::string path = PathUtils::GetModuleFolder();
@@ -673,6 +678,7 @@ bool CLMiner::LoadKernel()
     }
     return false;
 }
+*/
 
 void CLMiner::SetMinShare(XTaskWrapper* taskWrapper, uint64_t* searchBuffer, cheatcoin_field& last)
 {

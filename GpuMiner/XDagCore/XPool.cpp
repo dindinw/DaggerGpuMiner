@@ -1,11 +1,11 @@
 #include "XPool.h"
 #include <stdlib.h>
-#include "dfstools\dfslib_string.h"
-#include "dar\crc.h"
+#include "dfstools/dfslib_string.h"
+#include "dar/crc.h"
 #include "XAddress.h"
-#include "Core\Log.h"
-#include "Utils\Random.h"
-#include "Utils\StringFormat.h"
+#include "Core/Log.h"
+#include "Utils/Random.h"
+#include "Utils/StringFormat.h"
 
 #define SEND_SHARE_PERIOD 5
 #define BLOCK_TIME 64
@@ -94,6 +94,7 @@ bool XPool::SendToPool(cheatcoin_field *fields, int fieldCount)
 
 bool XPool::Initialize()
 {
+
     if(!_network.Initialize())
     {
         clog(XDag::LogChannel) << "Failed to initialize network connection";
@@ -103,7 +104,6 @@ bool XPool::Initialize()
         clog(XDag::LogChannel) << "Failed to initialize cryptography system";
         return false;
     }
-
     if(!XStorage::CheckStorageFolder())
     {
         clog(XDag::LogChannel) << "Cannot find storage folder";

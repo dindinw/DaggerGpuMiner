@@ -27,4 +27,6 @@ namespace XDag
         o << _t;
         return o.str();
     }
+    using bigint = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
+    using byte = uint8_t;
 }

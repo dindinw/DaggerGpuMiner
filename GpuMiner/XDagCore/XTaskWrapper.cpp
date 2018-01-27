@@ -1,5 +1,5 @@
 #include "XTaskWrapper.h"
-#include "Core\Log.h"
+#include "Core/Log.h"
 
 XTaskWrapper::XTaskWrapper()
 {

@@ -1,8 +1,11 @@
 #include "PathUtils.h"
+#if _WIN32
 #include <shlwapi.h>
+#endif
 
 std::string PathUtils::GetModuleFolder()
 {
+    std::string ret;
 #if _WIN32
     char szPath[MAX_PATH];
     char szBuffer[MAX_PATH];
@@ -12,7 +15,7 @@ std::string PathUtils::GetModuleFolder()
     ::GetFullPathName((LPTSTR)szPath, sizeof(szBuffer) / sizeof(*szBuffer), (LPTSTR)szBuffer, (LPTSTR*)&pszFile);
     *pszFile = 0;
 
-    std::string ret = szBuffer;
+    ret = szBuffer;
 #endif
     return ret;
 }
