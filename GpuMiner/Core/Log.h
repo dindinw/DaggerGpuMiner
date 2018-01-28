@@ -192,28 +192,28 @@ namespace XDag
     };
 
 // Kill all logs when when NLOG is defined.
-#if NLOG
-#define clog(X) nlog(X)
-#define cslog(X) nslog(X)
-#else
-#if NDEBUG
-#define clog(X) if (X::debug) {} else XDag::LogOutputStream<X, true>()
-#define cslog(X) if (X::debug) {} else XDag::LogOutputStream<X, false>()
-#else
+//#if NLOG
+//#define clog(X) nlog(X)
+//#define cslog(X) nslog(X)
+//#else
+//#if NDEBUG
+//#define clog(X) if (X::debug) {} else XDag::LogOutputStream<X, true>()
+//#define cslog(X) if (X::debug) {} else XDag::LogOutputStream<X, false>()
+//#else
 #define clog(X) XDag::LogOutputStream<X, true>()
 #define cslog(X) XDag::LogOutputStream<X, false>()
-#endif
-#endif
+//#endif
+//#endif
 
 // Simple cout-like stream objects for accessing common log channels.
 // Dirties the global namespace, but oh so convenient...
-#define cdebug clog(XDag::DebugChannel)
+//#define cdebug clog(XDag::DebugChannel)
 #define cnote clog(XDag::NoteChannel)
 #define cwarn clog(XDag::WarnChannel)
 
 // Null stream-like objects.
-#define ndebug if (true) {} else XDag::NullOutputStream()
-#define nlog(X) if (true) {} else XDag::NullOutputStream()
-#define nslog(X) if (true) {} else XDag::NullOutputStream()
+//#define ndebug if (true) {} else XDag::NullOutputStream()
+//#define nlog(X) if (true) {} else XDag::NullOutputStream()
+//#define nslog(X) if (true) {} else XDag::NullOutputStream()
 
 }
