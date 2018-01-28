@@ -260,7 +260,6 @@ CLMiner::CLMiner(unsigned index, XTaskProcessor* taskProcessor)
 
 CLMiner::~CLMiner()
 {
-    Pause();
 }
 
 bool CLMiner::ConfigureGPU(
@@ -270,6 +269,15 @@ bool CLMiner::ConfigureGPU(
     bool useAllOpenCLCompatibleDevices
 )
 {
+    //TODO: do I need automatically detemine path to executable folder?
+    std::string path = PathUtils::GetModuleFolder();
+    path += _clKernelName;
+    if(!PathUtils::FileExists(path))
+    {
+        XCL_LOG("OpenCL kernel file is not found");
+        return false;
+    }
+
     _platformId = platformId;
     _useAllOpenCLCompatibleDevices = useAllOpenCLCompatibleDevices;
 
@@ -307,7 +315,7 @@ bool CLMiner::ConfigureGPU(
     return true;
 }
 
-bool CLMiner::Init()
+bool CLMiner::Initialize()
 {
     // get all platforms
     try
@@ -465,20 +473,15 @@ bool CLMiner::Init()
 
 void CLMiner::WorkLoop()
 {
-    // Memory for zero-ing buffers. Cannot be static because crashes on macOS.
-    uint32_t const c_zero = 0;
     cheatcoin_field last;
     XTaskWrapper* previousTaskWrapper = 0;
     uint64_t nonce;
-    int iterations = 16;
-
-    if(!Init())
-    {
-        XCL_LOG("Failed to initialize OpenCL");
-        return;
-    }
+    int maxIterations = 16;
+    int loopCounter = 0;
 
     uint64_t results[OUTPUT_SIZE + 1];
+    uint64_t zeroBuffer[OUTPUT_SIZE + 1];
+    memset(zeroBuffer, 0, (OUTPUT_SIZE + 1) * sizeof(uint64_t));
 
     try
     {
@@ -507,18 +510,34 @@ void CLMiner::WorkLoop()
                 memcpy(last.data, taskWrapper->GetTask()->nonce.data, sizeof(cheatcoin_hash_t));
                 nonce = last.amount + _index * 1000000000000;//TODO: think of nonce increment
 
+                loopCounter = 0;
+
                 // Update constant buffers.
                 _queue.enqueueWriteBuffer(_stateBuffer, CL_FALSE, 0, 32, taskWrapper->GetTask()->ctx.state);
                 _queue.enqueueWriteBuffer(_dataBuffer, CL_FALSE, 0, 56, taskWrapper->GetTask()->ctx.data);
                 _queue.enqueueWriteBuffer(_minHashBuffer, CL_FALSE, 0, 32, taskWrapper->GetTask()->minhash.data);
-                _queue.enqueueWriteBuffer(_searchBuffer, CL_FALSE, 0, sizeof(c_zero), &c_zero);
+                _queue.enqueueWriteBuffer(_searchBuffer, CL_FALSE, 0, sizeof(zeroBuffer), zeroBuffer);
 
                 _searchKernel.setArg(0, _stateBuffer);
                 _searchKernel.setArg(1, _dataBuffer);
-                _searchKernel.setArg(3, iterations);
                 _searchKernel.setArg(4, _minHashBuffer);
                 _searchKernel.setArg(5, _searchBuffer); // Supply output buffer to kernel.
             }
+
+            //in order to avoid loosing nonce first 4 loops is performed with low range of values
+            int iterations;
+            int workSize;
+            if(loopCounter++ < 5)
+            {
+                iterations = 1;
+                workSize = _workgroupSize << 3;
+            }
+            else
+            {
+                iterations = maxIterations;
+                workSize = _globalWorkSize;
+            }
+            _searchKernel.setArg(3, iterations);
 
             // Read results.
             _queue.enqueueReadBuffer(_searchBuffer, CL_TRUE, 0, (OUTPUT_SIZE + 1) * sizeof(uint64_t), results);
@@ -527,15 +546,12 @@ void CLMiner::WorkLoop()
             if(hasSolution)
             {
                 // Reset search buffer if any solution found.
-                _queue.enqueueWriteBuffer(_searchBuffer, CL_FALSE, 0, sizeof(c_zero), &c_zero);
+                _queue.enqueueWriteBuffer(_searchBuffer, CL_FALSE, 0, sizeof(zeroBuffer), zeroBuffer);
             }
-
-            // Increase start nonce for following kernel execution.
-            nonce += _globalWorkSize * iterations;
 
             // Run the kernel.
             _searchKernel.setArg(2, nonce);
-            _queue.enqueueNDRangeKernel(_searchKernel, cl::NullRange, _globalWorkSize, _workgroupSize);
+            _queue.enqueueNDRangeKernel(_searchKernel, cl::NullRange, workSize, _workgroupSize);
 
             // Report results while the kernel is running.
             // It takes some time because hash must be re-evaluated on CPU.
@@ -545,22 +561,17 @@ void CLMiner::WorkLoop()
                 _queue.enqueueWriteBuffer(_minHashBuffer, CL_FALSE, 0, 32, taskWrapper->GetTask()->minhash.data);
             }
 
+            // Increase start nonce for following kernel execution.
+            nonce += workSize * iterations;
+
             // Report hash count
-            AddHashCount(_globalWorkSize * iterations);
+            AddHashCount(workSize * iterations);
         }
     }
     catch(cl::Error const& _e)
     {
         cwarn << XDagCLErrorHelper("OpenCL Error", _e);
     }
-}
-
-void CLMiner::KickOff()
-{
-}
-
-void CLMiner::Pause()
-{
 }
 
 unsigned CLMiner::GetNumDevices()
