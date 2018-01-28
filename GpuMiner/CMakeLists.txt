@@ -100,7 +100,7 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-
+set(OPENSSL_ROOT_DIR "/opt/openssl/")
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system )
 find_package(OpenCL REQUIRED)

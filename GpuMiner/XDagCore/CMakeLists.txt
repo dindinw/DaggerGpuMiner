@@ -12,6 +12,8 @@ set(SOURCES
     dfstools/dfslib_types.h
     XAddress.cpp
     XAddress.h
+    XBlock.cpp
+    XBlock.h
     XCpuMiner.cpp
     XCpuMiner.h
     XHash.cpp

@@ -7,3 +7,6 @@
 GpuMiner/GpuMiner.vcxproj.user
 GpuMiner/version.aps
 /params.txt
+build
+.idea/
+cmake-build-debug/
