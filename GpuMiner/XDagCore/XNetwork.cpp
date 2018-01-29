@@ -1,7 +1,7 @@
 #include "XNetwork.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "Core\Log.h"
+#include "Core/Log.h"
 
 #if _WIN32
 #include "win\netinet\in.h"
