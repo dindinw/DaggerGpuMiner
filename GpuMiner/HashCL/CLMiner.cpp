@@ -9,6 +9,7 @@
 #include "Hash/sha256_mod.h"
 #include <boost/algorithm/string.hpp>
 #include "CLMiner_kernel.h"
+#include "Utils/Utils.h"
 
 using namespace XDag;
 
@@ -18,7 +19,7 @@ using namespace XDag;
 unsigned CLMiner::_sWorkgroupSize = CLMiner::_defaultLocalWorkSize;
 unsigned CLMiner::_sInitialGlobalWorkSize = CLMiner::_defaultGlobalWorkSizeMultiplier * CLMiner::_defaultLocalWorkSize;
 std::string CLMiner::_clKernelName = "CLMiner_kernel.cl";
-bool CLMiner::_useAllOpenCLCompatibleDevices = false;
+bool CLMiner::_useOpenCpu = false;
 
 struct CLChannel : public LogChannel
 {
@@ -266,7 +267,7 @@ bool CLMiner::ConfigureGPU(
     unsigned localWorkSize,
     unsigned globalWorkSizeMultiplier,
     unsigned platformId,
-    bool useAllOpenCLCompatibleDevices
+    bool useOpenCpu
 )
 {
 	/*
@@ -281,7 +282,7 @@ bool CLMiner::ConfigureGPU(
 	*/
 
     _platformId = platformId;
-    _useAllOpenCLCompatibleDevices = useAllOpenCLCompatibleDevices;
+    _useOpenCpu = useOpenCpu;
 
     localWorkSize = ((localWorkSize + 7) / 8) * 8;
     _sWorkgroupSize = localWorkSize;
@@ -298,7 +299,7 @@ bool CLMiner::ConfigureGPU(
         return false;
     }
 
-    std::vector<cl::Device> devices = GetDevices(platforms, _platformId, _useAllOpenCLCompatibleDevices);
+    std::vector<cl::Device> devices = GetDevices(platforms, _platformId, _useOpenCpu);
     if(devices.size() == 0)
     {
         XCL_LOG("No OpenCL devices found.");
@@ -370,7 +371,7 @@ bool CLMiner::Initialize()
         }
 
         // get GPU device of the default platform
-        std::vector<cl::Device> devices = GetDevices(platforms, platformIdx, _useAllOpenCLCompatibleDevices);
+        std::vector<cl::Device> devices = GetDevices(platforms, platformIdx, _useOpenCpu);
         if(devices.empty())
         {
             XCL_LOG("No OpenCL devices found.");
@@ -476,7 +477,7 @@ bool CLMiner::Initialize()
 void CLMiner::WorkLoop()
 {
     cheatcoin_field last;
-    XTaskWrapper* previousTaskWrapper = 0;
+    uint64_t prevTaskIndex = 0;
     uint64_t nonce;
     int maxIterations = 16;
     int loopCounter = 0;
@@ -501,14 +502,14 @@ void CLMiner::WorkLoop()
             XTaskWrapper* taskWrapper = GetTask();
             if(taskWrapper == NULL)
             {
-                clog(LogChannel) << "No work. Pause for 2 s.";
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+                clog(LogChannel) << "No work. Pause for 3 s.";
+                std::this_thread::sleep_for(std::chrono::seconds(3));
                 continue;
             }
 
-            if(previousTaskWrapper == NULL || previousTaskWrapper != taskWrapper)
+            if(taskWrapper->GetIndex() != prevTaskIndex)
             {
-                previousTaskWrapper = taskWrapper;
+                prevTaskIndex = taskWrapper->GetIndex();
                 memcpy(last.data, taskWrapper->GetTask()->nonce.data, sizeof(cheatcoin_hash_t));
                 nonce = last.amount + _index * 1000000000000;//TODO: think of nonce increment
 
@@ -544,6 +545,8 @@ void CLMiner::WorkLoop()
             // Read results.
             _queue.enqueueReadBuffer(_searchBuffer, CL_TRUE, 0, (OUTPUT_SIZE + 1) * sizeof(uint64_t), results);
 
+            //miner return an array with 257 64-bit values. If nonce for hash lower than target hash is found - it is written to array. 
+            //the last value in array marks if any solution was found
             bool hasSolution = results[OUTPUT_SIZE] > 0;
             if(hasSolution)
             {
@@ -559,7 +562,12 @@ void CLMiner::WorkLoop()
             // It takes some time because hash must be re-evaluated on CPU.
             if(hasSolution)
             {
+                //we need to recalculate hashes for all founded nonces and choose the minimal one
                 SetMinShare(taskWrapper, results, last);
+#if _DEBUG
+                std::cout << HashToHexString(taskWrapper->GetTask()->minhash.data) << std::endl;
+#endif
+                //new minimal hash is written as target hash for GPU
                 _queue.enqueueWriteBuffer(_minHashBuffer, CL_FALSE, 0, 32, taskWrapper->GetTask()->minhash.data);
             }
 
@@ -582,7 +590,7 @@ unsigned CLMiner::GetNumDevices()
     if(platforms.empty())
         return 0;
 
-    std::vector<cl::Device> devices = GetDevices(platforms, _platformId, _useAllOpenCLCompatibleDevices);
+    std::vector<cl::Device> devices = GetDevices(platforms, _platformId, _useOpenCpu);
     if(devices.empty())
     {
         cwarn << "No OpenCL devices found.";
@@ -591,7 +599,7 @@ unsigned CLMiner::GetNumDevices()
     return (uint32_t)devices.size();
 }
 
-void CLMiner::ListDevices(bool useAllOpenCLCompatibleDevices)
+void CLMiner::ListDevices(bool useOpenCpu)
 {
     std::string outString = "\nListing OpenCL devices.\nFORMAT: [platformID] [deviceID] deviceName\n";
     unsigned int i = 0;
@@ -602,7 +610,7 @@ void CLMiner::ListDevices(bool useAllOpenCLCompatibleDevices)
     for(unsigned j = 0; j < platforms.size(); ++j)
     {
         i = 0;
-        std::vector<cl::Device> devices = GetDevices(platforms, j, useAllOpenCLCompatibleDevices);
+        std::vector<cl::Device> devices = GetDevices(platforms, j, useOpenCpu);
         for(auto const& device : devices)
         {
             outString += "[" + std::to_string(j) + "] [" + std::to_string(i) + "] " + device.getInfo<CL_DEVICE_NAME>() + "\n";

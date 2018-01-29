@@ -18,7 +18,7 @@ void XCpuMiner::WorkLoop()
 {
     cheatcoin_hash_t hash;
     cheatcoin_field last;
-    XTaskWrapper* previousTaskWrapper = 0;
+    uint64_t prevTaskIndex = 0;
     uint64_t nonce;
     int iterations = 256;
 
@@ -28,15 +28,14 @@ void XCpuMiner::WorkLoop()
         //TODO: move this check higher (before threads creation) in order to remove spam on startup
         if(taskWrapper == NULL)
         {
-            clog(LogChannel) << "No work. Pause for 2 s.";
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            clog(LogChannel) << "No work. Pause for 3 s.";
+            std::this_thread::sleep_for(std::chrono::seconds(3));
             continue;
         }
 
-        //yes, I compare memory addresses
-        if(previousTaskWrapper == NULL || previousTaskWrapper != taskWrapper)
+        if(taskWrapper->GetIndex() != prevTaskIndex)
         {
-            previousTaskWrapper = taskWrapper;
+            prevTaskIndex = taskWrapper->GetIndex();
             memcpy(last.data, taskWrapper->GetTask()->nonce.data, sizeof(cheatcoin_hash_t));
             nonce = last.amount + _index;
         }

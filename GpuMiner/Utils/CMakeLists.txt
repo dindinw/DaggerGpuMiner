@@ -10,10 +10,13 @@ set(SOURCES
     Random.cpp
     Random.h
     StringFormat.h
+    Utils.cpp
+    Utils.h
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(..)
 
 add_library(Utils ${SOURCES})
+
 

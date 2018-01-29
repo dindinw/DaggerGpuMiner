@@ -81,7 +81,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CL_USE_DEPRECATED_OPENCL_2_0_APIS;_WINSOCK_DEPRECATED_NO_WARNINGS;_WIN32_WINNT=0x0601;USE_OPENSSL_SHA</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(OPENCL_SDK)\lib\x86_64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OPENCL_SDK)\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -110,15 +110,20 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(OPENCL_SDK)\include;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CL_USE_DEPRECATED_OPENCL_2_0_APIS;_WINSOCK_DEPRECATED_NO_WARNINGS;_WIN32_WINNT=0x0601;USE_OPENSSL_SHA</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OPENCL_SDK)\lib\x86_64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OPENCL_SDK)\lib\x86</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy HashCL\CLMiner_kernel.cl "$(OutDir)CLMiner_kernel.cl" /Y</Command>
@@ -130,10 +135,12 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(OPENCL_SDK)\include;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CL_USE_DEPRECATED_OPENCL_2_0_APIS;_WINSOCK_DEPRECATED_NO_WARNINGS;_WIN32_WINNT=0x0601;USE_OPENSSL_SHA</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -141,6 +148,7 @@
       <AdditionalLibraryDirectories>$(OPENCL_SDK)\lib\x86_64</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>No</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy HashCL\CLMiner_kernel.cl "$(OutDir)CLMiner_kernel.cl" /Y</Command>
@@ -160,6 +168,7 @@
     <ClCompile Include="Utils\CpuInfo.cpp" />
     <ClCompile Include="Utils\PathUtils.cpp" />
     <ClCompile Include="Utils\Random.cpp" />
+    <ClCompile Include="Utils\Utils.cpp" />
     <ClCompile Include="XDagCore\dar\crc_c.cpp" />
     <ClCompile Include="XDagCore\dfstools\dfslib_crypt.cpp" />
     <ClCompile Include="XDagCore\dfstools\dfslib_string.cpp" />
@@ -193,6 +202,7 @@
     <ClInclude Include="Utils\PathUtils.h" />
     <ClInclude Include="Utils\Random.h" />
     <ClInclude Include="Utils\StringFormat.h" />
+    <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="XDagCore\dar\crc.h" />
     <ClInclude Include="XDagCore\dfstools\dfslib_crypt.h" />

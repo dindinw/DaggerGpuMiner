@@ -8,6 +8,10 @@ GpuMiner/GpuMiner.vcxproj.user
 GpuMiner/version.aps
 /params.txt
 /GpuMiner/Release/
+/Release/
+/Debug/
+/GpuMiner/Debug/
 build
 .idea/
 cmake-build-debug/
+
