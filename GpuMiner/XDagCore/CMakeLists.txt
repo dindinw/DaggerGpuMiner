@@ -35,7 +35,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(..)
 
 add_library(XDagCore ${SOURCES})
-target_link_libraries(XDagCore PUBLIC Hash)
+target_link_libraries(XDagCore PUBLIC Hash Core)
 
 
 

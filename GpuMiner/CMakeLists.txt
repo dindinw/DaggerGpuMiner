@@ -103,6 +103,7 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(OPENSSL_ROOT_DIR "/opt/openssl/")
 find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system )
+#set(OpenCL_DIR "~/.hunter/_Base/59b2b88/0452b62/c20b399/Install/lib/cmake/OpenCL")
 find_package(OpenCL REQUIRED)
 
 include_directories(

@@ -24,8 +24,9 @@ if(APPLE)
 	# On macOS use system OpenCL library.
 	find_package(OpenCL REQUIRED)
 else()
-	hunter_add_package(OpenCL)
-	find_package(OpenCL CONFIG REQUIRED)
+	# hunter_add_package(OpenCL)
+	# find_package(OpenCL CONFIG REQUIRED)
+	find_package(OpenCL REQUIRED)
 endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
