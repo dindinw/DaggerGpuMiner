@@ -1,8 +1,10 @@
-//#include <conio.h>
-#include <curses.h>
+#ifdef _WIN32
+#include <conio.h>
+#endif
 #include <thread>
 #include <fstream>
 #include <iostream>
+#include "Core/Log.h"
 #include "Core/MinerManager.h"
 
 using namespace XDag;
